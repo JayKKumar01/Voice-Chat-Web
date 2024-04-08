@@ -36,8 +36,6 @@ function openPeer() {
         appendLog('Connected to PeerJS server. Your ID is: ' + myId);
         if (!isHost) {
             connectPeer();
-        } else {
-            peers.push(myId);
         }
     });
 
@@ -53,28 +51,26 @@ function connectPeer() {
 function connect(otherId) {
     let connection = peer.connect(peerBranch + otherId, { reliable: true });
     connection.on('open', () => setupConnection(connection));
-    connection.on('close', onDataConnectionClose);
-    connection.on('error', onDataConnectionError);
+    // connection.on('close', onDataConnectionClose);
+    // connection.on('error', onDataConnectionError);
 }
 
 function setupConnection(connection) {
     connections.push(connection);
     const remoteId = connection.peer.replace(peerBranch, '');
-    peers.push(remoteId);
+
     appendLog(`Connected to ${remoteId}`);
     connection.on('data', handleData);
     connection.on('error', (err) => appendLog(`Connection error: ${err}`));
 
     if (isHost) {
+        
         connection.on('open', () => {
-
-            // send peers data to each conn as type userlist
-            connections.forEach(conn => {
-                conn.send({
-                    type: 'userlist',
-                    data: peers
-                });
+            connection.send({
+                type: 'userlist',
+                data: peers
             });
+            peers.push(remoteId);
         });
 
     }
@@ -84,8 +80,10 @@ function handleData(data) {
     // Check the type of data received
     switch (data.type) {
         case 'userlist':
-            // Append the received userlist to the log
-            appendLog('User List: ' + data.data.join(', '));
+            const userlist = data.data;
+            userlist.forEach(peerId => {
+                connect(peerId);
+            });
             break;
         default:
             // Handle other types of data if needed

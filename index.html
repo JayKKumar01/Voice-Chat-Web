@@ -10,13 +10,14 @@
 </head>
 <body>
   <div class="container">
-    <input type="text" id="nameField" placeholder="Enter your name...">
+    <input type="text" id="nameField" placeholder="Enter your name..." value="Jay">
     <input type="text" pattern="\d*" id="codeField" placeholder="Enter code...(optional)" oninput="checkCode()">
     <button id="joinButton" onclick="openPeer()">HOST</button>
   </div>
   <div id="logs-container">
     <textarea id="logs" readonly></textarea>
-    <script src="script.js"></script>
+    
   </div>
+  <script src="script.js"></script>
 </body>
 </html>
