@@ -51,6 +51,7 @@ function connectPeer() {
 function connect(otherId) {
     let connection = peer.connect(peerBranch + otherId, { reliable: true });
     connection.on('open', () => setupConnection(connection));
+    // connection.on('open', () => setupConnection(connection));
     // connection.on('close', onDataConnectionClose);
     // connection.on('error', onDataConnectionError);
 }
@@ -70,19 +71,21 @@ function setupConnection(connection) {
                 type: 'userlist',
                 data: peers
             });
-            peers.push(remoteId);
+            peers.push({id: remoteId, name: null});
         });
 
     }
 }
+
+
 
 function handleData(data) {
     // Check the type of data received
     switch (data.type) {
         case 'userlist':
             const userlist = data.data;
-            userlist.forEach(peerId => {
-                connect(peerId);
+            userlist.forEach(peer => {
+                connect(peer.id);
             });
             break;
         default:

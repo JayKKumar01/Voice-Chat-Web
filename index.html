@@ -6,7 +6,6 @@
   <title>Voice Chat Web 1.0</title>
   <link rel="stylesheet" href="styles.css">
   <script src="peer.js"></script>
-  
 </head>
 <body>
   <div class="container">
@@ -14,9 +13,12 @@
     <input type="text" pattern="\d*" id="codeField" placeholder="Enter code...(optional)" oninput="checkCode()">
     <button id="joinButton" onclick="openPeer()">HOST</button>
   </div>
+  <div id="peersContainer" style="display: none;">
+    <h2>List of Peers</h2>
+    <ul id="peersList"></ul>
+  </div>
   <div id="logs-container">
     <textarea id="logs" readonly></textarea>
-    
   </div>
   <script src="script.js"></script>
 </body>
