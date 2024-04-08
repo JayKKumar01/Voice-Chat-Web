@@ -11,6 +11,33 @@ body {
     align-items: center; /* Center the content vertically */
 }
 
+/* Styling for the log textarea */
+textarea#logs {
+    width: 40%;
+    height: 150px;
+    resize: none;
+    overflow-y: scroll;
+    position: fixed;
+    top: 0px;
+    right: 0;
+    margin: 20px;
+    border: 1px solid #333; /* Dark border color */
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #222; /* Darker background color */
+    color: #fff; /* Light text color */
+}
+
+/* Styling for custom scrollbar in WebKit-based browsers (Chrome, Safari) */
+textarea#logs::-webkit-scrollbar {
+    width: 2px; /* Set your desired scrollbar width */
+}
+
+/* Styling for custom scrollbar in Firefox */
+textarea#logs {
+    scrollbar-width: thin; /* Set your desired scrollbar width */
+}
+
 /* Styling for the container */
 .container {
     display: flex;
