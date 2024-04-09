@@ -1,6 +1,10 @@
 // Constants
 const logsTextarea = document.getElementById('logs');
 const codeInput = document.getElementById('codeField');
+const container = document.querySelector('.container');
+const peerListContainer = document.getElementById('peersContainer');
+const peerList = document.getElementById('peersList');
+
 const peerBranch = "JayKKumar01-Voice_Chat_Web-";
 
 // Variables
@@ -43,6 +47,7 @@ function openPeer() {
 
 function onPeerOpen(id) {
     myId = id.replace(peerBranch, '');
+    togglePeerListVisibility();
     appendLog('Connected to PeerJS server. Your ID is: ' + myId);
     if (!isHost) {
         connect(codeInput.value);
@@ -91,11 +96,35 @@ function handleData(data) {
         case 'askName':
             peers[data.peerId] = data.name;
             appendLog(data.peerId + ": " + data.name);
+            updatePeerList();
             break;
         default:
             break;
     }
 }
+function togglePeerListVisibility() {
+    container.style.display = 'none';
+    peerListContainer.style.display = 'block';
+    updatePeerList();
+}
+
+function updatePeerList() {
+
+    // Clear previous peer list
+    peerList.innerHTML = '';
+
+    const listItem = document.createElement('li');
+    listItem.textContent = `${myId}: ${myName}`;
+    peerList.appendChild(listItem);
+    // Add new list items for each peer
+    for (const peerId in peers) {
+        const peerName = peers[peerId];
+        const listItem = document.createElement('li');
+        listItem.textContent = `${peerId}: ${peerName}`;
+        peerList.appendChild(listItem);
+    }
+}
+
 
 function checkCode() {
     var codeInput = document.getElementById('codeField');
