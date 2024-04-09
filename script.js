@@ -9,6 +9,7 @@ const peerBranch = "JayKKumar01-Voice_Chat_Web-";
 
 // Variables
 let peer, myId, connections = [], peers = {}, isHost = true, myName;
+let localStream;
 
 // Event listener
 document.addEventListener('DOMContentLoaded', function () {
@@ -43,6 +44,21 @@ function openPeer() {
     peer = new Peer(peerId);
     peer.on('open', onPeerOpen);
     peer.on('connection', onPeerConnection);
+    peer.on('call', function (call) {
+
+        var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+    
+        getUserMedia({ video: false, audio: true }, function (stream) {
+            localStream = stream;
+            call.answer(stream); // Answer the call with an A/V stream.
+            call.on('stream', function (remoteStream) {
+                createAudioElement(remoteStream);
+            });
+        }, function (err) {
+            appendLog('Failed to get local stream: '+ err);
+        });
+    });
+
 }
 
 function onPeerOpen(id) {
@@ -63,6 +79,32 @@ function onPeerConnection(connection) {
 function connect(otherId) {
     let connection = peer.connect(peerBranch + otherId, { reliable: true });
     connection.on('open', () => setupConnection(connection));
+
+    var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+    getUserMedia({ video: false, audio: true }, function (stream) {
+        localStream = stream;
+        var call = peer.call(peerBranch + otherId, stream);
+        call.on('stream', function (remoteStream) {
+            createAudioElement(remoteStream);
+        });
+    }, function (err) {
+        appendLog('Failed to get local stream: ' + err);
+    });
+
+
+    // navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    //     .then((stream) => {
+    //         localStream = stream;
+    //         const call = peer.call(otherId, stream);
+    //         call.on('stream', (remoteStream) => {
+    //             createAudioElement(remoteStream);
+    //         });
+    //     })
+    //     .catch((error) => {
+    //         appendLog('Error accessing media devices: ' + error);
+    //     });
+
+
 }
 
 function setupConnection(connection) {
@@ -125,6 +167,14 @@ function updatePeerList() {
     }
 }
 
+function createAudioElement(stream) {
+    const audioContainer = document.getElementById('audioContainer');
+    const audioElement = document.createElement('audio');
+    audioElement.autoplay = true;
+    audioContainer.appendChild(audioElement);
+    audioElement.srcObject = stream;
+    audioElement.play();
+}
 
 function checkCode() {
     var codeInput = document.getElementById('codeField');
