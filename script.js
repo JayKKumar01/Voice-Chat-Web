@@ -1,25 +1,20 @@
+// Constants
 const logsTextarea = document.getElementById('logs');
+const codeInput = document.getElementById('codeField');
 const peerBranch = "JayKKumar01-Voice_Chat_Web-";
-const randomId = getRandomCode();
 
-let peer;
-let myId;
-let connections = [];
-let peers = {};
-let isHost = true;
-let myName;
+// Variables
+let peer, myId, connections = [], peers = {}, isHost = true, myName;
 
+// Event listener
 document.addEventListener('DOMContentLoaded', function () {
     setRandomName();
 });
 
-
-
-
+// Utility functions
 function getRandomCode() {
     return Math.floor(100000 + Math.random() * 900000);
 }
-
 
 function appendLog(log) {
     logsTextarea.value += `${log}\n`;
@@ -33,7 +28,6 @@ function setRandomName() {
     document.getElementById('nameField').value = randomName;
 }
 
-
 function openPeer() {
     const nameInput = document.getElementById('nameField').value;
     if (nameInput.length === 0) {
@@ -41,68 +35,52 @@ function openPeer() {
         return;
     }
     myName = nameInput;
-
-    // Create a PeerJS instance
-
-    const peerId = `${peerBranch}${randomId}`;
-
+    const peerId = `${peerBranch}${getRandomCode()}`;
     peer = new Peer(peerId);
-
-    peer.on('open', function (id) {
-        myId = id.replace(peerBranch, '');
-        appendLog('Connected to PeerJS server. Your ID is: ' + myId);
-        if (!isHost) {
-            connectPeer();
-        }
-    });
-
-    peer.on('connection', function (connection) {
-        connection.on('open', () => setupConnection(connection));
-    });
+    peer.on('open', onPeerOpen);
+    peer.on('connection', onPeerConnection);
 }
 
-function connectPeer() {
-    const codeInput = document.getElementById('codeField').value;
-    connect(codeInput);
+function onPeerOpen(id) {
+    myId = id.replace(peerBranch, '');
+    appendLog('Connected to PeerJS server. Your ID is: ' + myId);
+    if (!isHost) {
+        connect(codeInput.value);
+    }
 }
+
+function onPeerConnection(connection) {
+    connection.on('open', () => setupConnection(connection));
+}
+
+
 
 function connect(otherId) {
     let connection = peer.connect(peerBranch + otherId, { reliable: true });
     connection.on('open', () => setupConnection(connection));
-    // connection.on('close', onDataConnectionClose);
-    // connection.on('error', onDataConnectionError);
 }
 
 function setupConnection(connection) {
     connections.push(connection);
     const remoteId = connection.peer.replace(peerBranch, '');
-
     appendLog(`Connected to ${remoteId}`);
     connection.on('data', handleData);
     connection.on('error', (err) => appendLog(`Connection error: ${err}`));
-
     connection.send({
         type: 'askName',
-        peerId: randomId,
+        peerId: myId,
         name: myName
     });
-
     if (isHost) {
-
         connection.send({
             type: 'userlist',
             data: peers
         });
         peers[remoteId] = peers[remoteId] || null;
-
     }
-
 }
 
-
-
 function handleData(data) {
-    // Check the type of data received
     switch (data.type) {
         case 'userlist':
             const userlist = data.data;
@@ -115,47 +93,24 @@ function handleData(data) {
             appendLog(data.peerId + ": " + data.name);
             break;
         default:
-            // Handle other types of data if needed
             break;
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 function checkCode() {
     var codeInput = document.getElementById('codeField');
     var joinButton = document.getElementById('joinButton');
-
     codeInput.value = codeInput.value.replace(/\D/g, '');
-
-    // Check if the input field is empty
     if (codeInput.value === '') {
-        codeInput.style.backgroundColor = ''; // Revert back to default background color
+        codeInput.style.backgroundColor = '';
         joinButton.innerHTML = "HOST";
         isHost = true;
-        return; // Exit the function early if input is empty
+        return;
     }
-
-
-
-    // Change background color to red
     codeInput.style.backgroundColor = '#800000';
-
-    // Check if codeInput contains exactly 6 digits
     if (/^\d{6}$/.test(codeInput.value)) {
         joinButton.innerHTML = "JOIN";
-        codeInput.style.backgroundColor = ''; // Revert back to default background color
+        codeInput.style.backgroundColor = '';
         isHost = false;
         appendLog("Ready to Join " + codeInput.value);
     } else {
